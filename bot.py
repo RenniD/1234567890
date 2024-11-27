@@ -67,7 +67,6 @@ async def data_end(update, context):
     await update.message.reply_text("Сколько гостей будет👨🏿👩🏿?")
     return GUESTS
 
-
 async def guests (update, context):
     context.user_data['guests'] = update.message.text
     reply_keyboard = [["24", "47", "98"]]
@@ -75,11 +74,15 @@ async def guests (update, context):
     await update.message.reply_text("Сколько гостей будет👨🏿👩🏿?", reply_markup=markup)
     return ROOM_TYPE
 
-async def data_end(update, context):
-    context.user_data['data_end'] = update.message.text
-    await update.message.reply_text("Сколько гостей будет👨🏿👩🏿?")
-    return GUESTS
+#???
+# async def data_end(update, context):
+#     context.user_data['data_end'] = update.message.text
+#     await update.message.reply_text("Сколько гостей будет👨🏿👩🏿?")
+#     return GUESTS
 
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text("Бронирование отменено. Возвращайтесь, когда будете готовы!", reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END
 #-----------------------------------------------------------------------------------
 
 app.add_handler(CommandHandler("start", start_command))
@@ -89,12 +92,12 @@ app.add_handler(CallbackQueryHandler(tap_button))
 
 # Добавление ConversationHandler для бронирования
 booking_handler = ConversationHandler(
-    entry_points=[CallbackQueryHandler(button_handler, pattern="^book$")],
+    entry_points=[CallbackQueryHandler(tap_button, pattern="^book$")],
     states={
-        DATE_START: [MessageHandler(filters.TEXT & ~filters.COMMAND, date_start)],
-        DATE_END: [MessageHandler(filters.TEXT & ~filters.COMMAND, date_end)],
+        DATE_START: [MessageHandler(filters.TEXT & ~filters.COMMAND, data_start)],
+        DATE_END: [MessageHandler(filters.TEXT & ~filters.COMMAND, data_end)],
         GUESTS: [MessageHandler(filters.TEXT & ~filters.COMMAND, guests)],
-        ROOM_TYPE: [MessageHandler(filters.TEXT & ~filters.COMMAND, room_type)],
+        # ROOM_TYPE: [MessageHandler(filters.TEXT & ~filters.COMMAND, room_type)],  ???
     },
     fallbacks=[CommandHandler("cancel", cancel)],
 )
@@ -105,4 +108,3 @@ app.add_handler(booking_handler)
 
 if __name__ == '__main__':
     app.run_polling()
-```
